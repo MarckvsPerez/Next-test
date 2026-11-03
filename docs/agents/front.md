@@ -31,4 +31,5 @@ Rules for this repo. They override the generic ones in `team:front`.
 ## Quality
 
 - Before closing a task: `npx next typegen && npx tsc --noEmit && npm run lint`. The gate runs the same thing.
-- There's no test runner yet. If the task changes behaviour, say so in the task so the lead can decide whether to add Vitest first.
+- Tests run with Vitest + React Testing Library (jsdom). Put test files next to the code they test as `*.test.ts(x)` under `src/`. Use `npm test` to run them once and `npm run test:watch` for watch mode. If a task changes behaviour, add or update its test.
+- Vitest can't render `async` Server Components. Test those with E2E tests, not unit tests.

@@ -22,4 +22,4 @@ Rules for this repo. They override the generic ones in `team:back`.
 ## Quality
 
 - Before closing a task: `npx next typegen && npx tsc --noEmit && npm run lint`.
-- There's no test runner yet. If you add logic in `src/server/`, write it as pure functions so it can be tested once Vitest exists.
+- Tests run with Vitest (`npm test`). The default environment is jsdom, so start every server test file with `// @vitest-environment node`. Write logic in `src/server/` as pure functions and test it next to the code (`*.test.ts`).
