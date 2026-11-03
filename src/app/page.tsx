@@ -1,5 +1,5 @@
 import { ContactForm } from "@/components/contact-form";
-import { about, projects, tagline } from "@/lib/content";
+import { about, projects, skillGroups, skillsTitle, tagline } from "@/lib/content";
 
 const container = "mx-auto w-full max-w-3xl px-6 sm:px-8";
 const section = `${container} border-t border-border py-16 sm:py-24`;
@@ -20,7 +20,7 @@ export default function Home() {
         Saltar al contenido
       </a>
 
-      <header className={`${container} flex items-center justify-between py-4`}>
+      <header className={`${container} flex flex-wrap items-center justify-between gap-x-4 py-4`}>
         <a href="#inicio" className="inline-flex min-h-11 items-center text-sm font-semibold">
           Marc Pérez
         </a>
@@ -28,6 +28,9 @@ export default function Home() {
           <ul className="flex gap-4 text-sm text-muted sm:gap-6">
             <li>
               <a href="#sobre-mi" className={linkClass}>Sobre mí</a>
+            </li>
+            <li>
+              <a href="#conocimientos" className={linkClass}>Conocimientos</a>
             </li>
             <li>
               <a href="#proyectos" className={linkClass}>Proyectos</a>
@@ -74,6 +77,37 @@ export default function Home() {
           <div className="mt-4 max-w-prose space-y-4 text-base leading-7 text-muted">
             {about.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </section>
+
+        <section
+          id="conocimientos"
+          aria-labelledby="conocimientos-title"
+          className={section}
+        >
+          <h2
+            id="conocimientos-title"
+            className="text-2xl font-semibold tracking-tight"
+          >
+            {skillsTitle}
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {skillGroups.map((group) => (
+              <article
+                key={group.title}
+                className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-6"
+              >
+                <h3 className="text-lg font-semibold">{group.title}</h3>
+                <ul aria-label={group.title} className="space-y-2 text-sm leading-6">
+                  {group.skills.map((skill) => (
+                    <li key={skill.name}>
+                      <span>{skill.name}</span>
+                      <span className="block text-muted">{skill.level}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
             ))}
           </div>
         </section>

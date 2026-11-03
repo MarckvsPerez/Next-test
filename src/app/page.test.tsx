@@ -22,3 +22,13 @@ test("Home has the three section headings and the landmarks", () => {
   expect(screen.getByRole("main")).toBeDefined();
   expect(screen.getByRole("navigation", { name: "Principal" })).toBeDefined();
 });
+
+test("Home renders the knowledge section with its three groups", () => {
+  render(<Home />);
+  expect(
+    screen.getByRole("heading", { level: 2, name: "Mis conocimientos" }),
+  ).toBeDefined();
+  for (const name of ["Front", "Back", "Database"]) {
+    expect(screen.getByRole("heading", { level: 3, name })).toBeDefined();
+  }
+});

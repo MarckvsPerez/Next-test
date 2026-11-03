@@ -30,3 +30,47 @@ export const projects: Project[] = [
     tags: ["Etiqueta"],
   },
 ];
+
+export type Skill = {
+  name: string;
+  level: string; // short level label
+};
+
+export type SkillGroup = {
+  title: string;
+  skills: Skill[]; // 4 to 6
+};
+
+// EXAMPLE CONTENT: invented placeholder data.
+export const skillsTitle = "Mis conocimientos";
+
+export const skillGroups: SkillGroup[] = [
+  {
+    title: "Front",
+    skills: [
+      { name: "Tecnología de ejemplo A", level: "Avanzado" },
+      { name: "Tecnología de ejemplo B", level: "Avanzado" },
+      { name: "Tecnología de ejemplo C", level: "Intermedio" },
+      { name: "Tecnología de ejemplo D", level: "Intermedio" },
+      { name: "Tecnología de ejemplo E", level: "Básico" },
+    ],
+  },
+  {
+    title: "Back",
+    skills: [
+      { name: "Tecnología de ejemplo F", level: "Avanzado" },
+      { name: "Tecnología de ejemplo G", level: "Intermedio" },
+      { name: "Tecnología de ejemplo H", level: "Intermedio" },
+      { name: "Tecnología de ejemplo I", level: "Básico" },
+    ],
+  },
+  {
+    title: "Database",
+    skills: [
+      { name: "Tecnología de ejemplo J", level: "Avanzado" },
+      { name: "Tecnología de ejemplo K", level: "Intermedio" },
+      { name: "Tecnología de ejemplo L", level: "Intermedio" },
+      { name: "Tecnología de ejemplo M", level: "Básico" },
+    ],
+  },
+];
