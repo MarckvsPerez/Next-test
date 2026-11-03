@@ -15,4 +15,6 @@ This project uses the `team` plugin's agent team. Active roles: `front`, `back`,
 - The lead creates each teammate from the `agent` of its role in `.claude/team.json`, and **must load the `team:lead` skill** before creating the team.
 - Each role only edits the files in its `owns`. `designer` proposes token changes and `front` applies them in `src/app/globals.css`.
 - Per-role addenda: `docs/agents/front.md` and `docs/agents/back.md`.
-- Quality gate on every closed task: `npx next typegen && npx tsc --noEmit && npm run lint`, plus an automatic review (`gate.review`).
+- Changes go through `/team:run <change>` (or the `team:lead` skill), which sizes them first (S, M or L) so small changes don't create a team.
+- Quality gate on every closed task (`gate.checks`): `npx next typegen && npx tsc --noEmit --incremental` and `npx eslint --cache --max-warnings=0` on the changed files only, plus an automatic review for tasks of 40+ changed lines (`gate.review`, `gate.reviewMinLines`).
+- Whole-project checks (`gate.final`): `npm run build` and `npm test`, run once by `reviewer` when the change closes.

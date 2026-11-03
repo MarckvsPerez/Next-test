@@ -16,18 +16,25 @@
         "package-lock.json",
         "next.config.ts",
         "tsconfig.json",
-        "eslint.config.mjs"
+        "eslint.config.mjs",
+        "vitest.config.mts",
+        "vitest.setup.ts"
       ],
       "context": "docs/agents/front.md"
     },
     "back": {
       "agent": "team:back",
-      "owns": ["src/app/api/*", "src/server/*"],
+      "owns": [
+        "src/app/api/*",
+        "src/server/*"
+      ],
       "context": "docs/agents/back.md"
     },
     "designer": {
       "agent": "team:designer",
-      "owns": ["docs/design/*"]
+      "owns": [
+        "docs/design/*"
+      ]
     },
     "reviewer": {
       "agent": "team:reviewer",
@@ -35,15 +42,49 @@
     }
   },
   "gate": {
-    "ignore": ["*.md", "docs/*", "openspec/*", ".claude/*", ".gitignore"],
+    "ignore": [
+      "*.md",
+      "docs/*",
+      "openspec/*",
+      ".claude/*",
+      ".gitignore"
+    ],
     "checks": [
       {
-        "name": "web",
-        "when": ["src/*", "public/*", "*.ts", "*.mjs", "package.json", "tsconfig.json"],
-        "run": "npx next typegen && npx tsc --noEmit && npm run lint"
+        "name": "typecheck",
+        "when": [
+          "src/*",
+          "*.ts",
+          "*.mts",
+          "tsconfig.json",
+          "package.json"
+        ],
+        "run": "npx next typegen && npx tsc --noEmit --incremental"
+      },
+      {
+        "name": "lint",
+        "when": [
+          "src/*.ts",
+          "src/*.tsx",
+          "*.ts",
+          "*.mts",
+          "*.mjs"
+        ],
+        "run": "npx eslint --cache --max-warnings=0 {files}"
       }
     ],
-    "review": true
+    "final": [
+      {
+        "name": "build",
+        "run": "npm run build"
+      },
+      {
+        "name": "tests",
+        "run": "npm test"
+      }
+    ],
+    "review": true,
+    "reviewMinLines": 40
   },
   "miniverse": {
     "url": "http://127.0.0.1:4321"
