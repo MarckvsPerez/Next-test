@@ -1,0 +1,51 @@
+{
+  "project": "team-playground",
+  "roles": {
+    "front": {
+      "agent": "team:front",
+      "owns": [
+        "src/app/*.tsx",
+        "src/app/*.css",
+        "src/app/*.ico",
+        "src/components/*",
+        "src/hooks/*",
+        "src/lib/*",
+        "src/styles/*",
+        "public/*",
+        "package.json",
+        "package-lock.json",
+        "next.config.ts",
+        "tsconfig.json",
+        "eslint.config.mjs"
+      ],
+      "context": "docs/agents/front.md"
+    },
+    "back": {
+      "agent": "team:back",
+      "owns": ["src/app/api/*", "src/server/*"],
+      "context": "docs/agents/back.md"
+    },
+    "designer": {
+      "agent": "team:designer",
+      "owns": ["docs/design/*"]
+    },
+    "reviewer": {
+      "agent": "team:reviewer",
+      "owns": []
+    }
+  },
+  "gate": {
+    "ignore": ["*.md", "docs/*", "openspec/*", ".claude/*", ".gitignore"],
+    "checks": [
+      {
+        "name": "web",
+        "when": ["src/*", "public/*", "*.ts", "*.mjs", "package.json", "tsconfig.json"],
+        "run": "npx next typegen && npx tsc --noEmit && npm run lint"
+      }
+    ],
+    "review": true
+  },
+  "miniverse": {
+    "url": "http://127.0.0.1:4321"
+  }
+}
