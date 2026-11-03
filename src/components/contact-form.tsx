@@ -284,7 +284,7 @@ export function ContactForm() {
       <button
         type="submit"
         aria-disabled={submitting}
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-foreground-hover sm:w-auto sm:justify-self-start"
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent px-5 text-base font-medium text-accent-foreground transition-colors hover:bg-accent-hover sm:w-auto sm:justify-self-start"
       >
         {submitting && (
           <svg

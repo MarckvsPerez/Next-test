@@ -6,7 +6,7 @@ const section = `${container} border-t border-border py-16 sm:py-24`;
 const linkClass =
   "inline-flex min-h-11 items-center transition-colors hover:text-foreground";
 const primaryCta =
-  "inline-flex h-12 w-full items-center justify-center rounded-full bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-foreground-hover sm:w-auto";
+  "inline-flex h-12 w-full items-center justify-center rounded-full bg-accent px-5 text-base font-medium text-accent-foreground transition-colors hover:bg-accent-hover sm:w-auto";
 const secondaryCta =
   "inline-flex h-12 w-full items-center justify-center rounded-full border border-border-strong px-5 text-base font-medium transition-colors hover:bg-surface sm:w-auto";
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { tagline } from "@/lib/content";
 import "./globals.css";
@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Marc Pérez",
   description: tagline,
+};
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  // Literal copy of --background in globals.css (meta tags cannot read CSS vars).
+  themeColor: "#2A2A2A",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

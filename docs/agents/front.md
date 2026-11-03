@@ -17,7 +17,9 @@ Rules for this repo. They override the generic ones in `team:front`.
 
 - Tailwind v4 has no `tailwind.config.*`. Tokens are CSS variables in `:root` and get exposed in `@theme inline` inside `src/app/globals.css`.
 - Use utilities based on tokens (`bg-background`, `text-foreground`). Don't use loose hex colours in components. If a token is missing, ask `designer` for it. You own `globals.css` and you apply the change.
-- Dark mode is done with `@media (prefers-color-scheme: dark)` over the same variables. Every new token needs both values.
+- The site is dark-only (charcoal `#2A2A2A`, silver `#C0C0C0`, red accent `#E10600`). There's a single `:root`, with one value per token, `color-scheme: dark`, and no `prefers-color-scheme` block. Don't reintroduce a light theme without a decision from `designer`.
+- The red accent (`--accent`) is only a fill with `--accent-foreground` (white) on top. It's never text, a border or a focus ring: on `--background` it gives 2.89:1 and on `--surface` 2.54:1, below the minimum. The list of elements allowed to use it is in `docs/design/landing.md` §3.
+- `themeColor` in the `viewport` of `src/app/layout.tsx` duplicates `--background` (meta tags can't read CSS variables). If the background changes, update both.
 - Every animation needs an alternative under `prefers-reduced-motion: reduce`.
 
 ## Structure and boundaries

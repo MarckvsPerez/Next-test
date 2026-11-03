@@ -2,7 +2,7 @@
 
 Design spec for the home (`src/app/page.tsx`). `designer` decides the what and the why; `front` decides the how. All visible copy is Spanish and is final unless marked as placeholder.
 
-Visual direction: extend what's already there. Monochrome on top of `--background` / `--foreground`, Geist Sans, a lot of whitespace, no accent colour. The only colours are semantic: error, success and focus.
+Visual direction: **dark only**. Charcoal background (`#2A2A2A`), silver text (`#C0C0C0`), Geist Sans, a lot of whitespace, and **one signal accent, Signal Red (`#E10600`), used only as the fill of the two primary actions** (§3 "Accent: where yes, where no"). Everything else is greyscale; the only other colours are semantic (error, success). There is no light theme and the page does not follow `prefers-color-scheme`.
 
 ---
 
@@ -14,6 +14,8 @@ Visual direction: extend what's already there. Monochrome on top of `--backgroun
 | `metadata.title = "Marc Pérez"`, `description` = the hero tagline | The tab and search results still say "Create Next App". |
 | `body { font-family: var(--font-sans), system-ui, sans-serif; }` instead of `Arial` | Geist is loaded but `globals.css` overrides it with Arial on `body`. |
 | `html { scroll-behavior: smooth }` only inside `@media (prefers-reduced-motion: no-preference)` | Smooth scrolling to anchors is vestibular motion. |
+| `:root { color-scheme: dark; }` in `globals.css` **and** `export const viewport = { colorScheme: "dark", themeColor: "#2A2A2A" }` in `layout.tsx` | Native controls, autofill, scrollbar and the browser UI render dark. The meta tag applies before CSS loads, so there's no light flash. |
+| Delete the `@media (prefers-color-scheme: dark)` block; the values in §3 go straight into `:root` | Dark only, by the user's decision. A light OS setting must not change the page. |
 
 ---
 
@@ -63,7 +65,7 @@ Minimum touch target: **44 × 44 px** (`min-h-11`) for nav links, CTAs, the butt
 - h1: `text-4xl sm:text-5xl font-semibold tracking-tight`.
 - Tagline: `mt-4 text-lg sm:text-xl text-muted max-w-prose`.
 - CTAs: `mt-8 flex flex-col gap-3 sm:flex-row`. Full width on mobile, auto width on `sm+`.
-  - Primary "Escríbeme" → `#contacto`: `bg-foreground text-background`, hover `bg-foreground-hover`, `rounded-full h-12 px-5`.
+  - Primary "Escríbeme" → `#contacto`: `bg-accent text-accent-foreground`, hover `bg-accent-hover`, `rounded-full h-12 px-5`.
   - Secondary "Ver proyectos" → `#proyectos`: `border border-border-strong`, hover `bg-surface`, same size.
 
 ### Sobre mí
@@ -98,7 +100,7 @@ Placeholder content: **don't invent biographical data or real projects**. Use se
 - Form `mt-8 grid gap-6`, one column at every width (three fields don't justify two columns).
 - Field: `<label>` above (`text-sm font-medium`), input below `mt-2 w-full min-h-11 rounded-lg border border-border-strong bg-background px-3 text-base`. Use `text-base` (16px) so iOS doesn't zoom on focus.
 - Textarea: `rows={6}`, `resize-y`, `min-h-36`.
-- Button: `justify-self-start` on `sm+`, `w-full` on mobile, same primary style as the hero CTA.
+- Button: `justify-self-start` on `sm+`, `w-full` on mobile, same primary style as the hero CTA (`bg-accent text-accent-foreground`, hover `bg-accent-hover`). While submitting (`aria-disabled`) it keeps the same colours; "Enviando…" and the spinner carry the state.
 - Result region below the button (see §4).
 
 ### Footer
@@ -109,42 +111,79 @@ Placeholder content: **don't invent biographical data or real projects**. Use se
 
 ## 3. Tokens
 
-### Existing (in use)
+**Rule: dark only. Every token has exactly one value; do not add light values or a `prefers-color-scheme` query.** (This supersedes any older note saying every token needs both values.) The single value is declared directly in `:root` (no `prefers-color-scheme` media query) and exposed in `@theme inline` as `--color-*`. `:root` also declares `color-scheme: dark` (§0).
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `--background` | `#ffffff` | `#0a0a0a` | page, inputs |
-| `--foreground` | `#171717` | `#ededed` | main text, primary button |
-| `--font-sans` / `--font-mono` | Geist | Geist | text / tags |
+### Palette
 
-### New (front adds them in `:root`, in the dark media query and in `@theme inline` as `--color-*`)
+| Token | Value | Use and justification |
+|---|---|---|
+| `--background` | `#2A2A2A` | Charcoal Grey. Page, inputs, skip link background |
+| `--foreground` | `#C0C0C0` | Moonlit Silver. Main text, headings, input text, secondary CTA text |
+| `--muted` | `#A0A0A0` | secondary text (tagline, paragraphs, hints, counter, footer, nav at rest). Dimmer than silver so the hierarchy survives, still ≥ 4.5:1 on surface |
+| `--surface` | `#333333` | project cards, secondary CTA hover. One step above the background |
+| `--border` | `#444444` | decorative separators, card borders, tags. Decorative, no minimum |
+| `--border-strong` | `#8A8A8A` | **input and secondary CTA borders**, card hover border (WCAG 1.4.11: ≥ 3:1) |
+| `--ring` | `#FFFFFF` | focus outline. Brighter than any text, so focus is never confused with content. Red is **not** valid here (2.89:1) |
+| `--accent` | `#E10600` | **new.** Signal Red. Fill of the two primary actions only |
+| `--accent-foreground` | `#FFFFFF` | **new.** Text and icon on `--accent` / `--accent-hover`. Silver on red is 2.73:1, so it can't be silver |
+| `--accent-hover` | `#C00500` | **new.** Primary action hover. Darker, not lighter: white text stays ≥ 4.5:1 only while the red's luminance is ≤ 0.183, and the base red is already at 0.161 |
+| `--danger` | `#FF9A94` | field error text and borders, error banner text. Light coral: much lighter than the accent (2.44:1 between them) so an error never reads as "the brand red", and it's always paired with an icon |
+| `--danger-surface` | `#4A2626` | error banner background |
+| `--success` | `#6FCF8A` | success banner text |
+| `--success-surface` | `#213A28` | success banner background |
+| `--font-sans` / `--font-mono` | Geist | text / tags (unchanged) |
+| ~~`--foreground-hover`~~ | **removed** | its only use was the hover of the silver primary button, which is now `--accent-hover`. Front deletes it from `:root` and `@theme`; no class may reference `bg-foreground-hover` |
 
-| Token | Light | Dark | Use and justification | Contrast checked |
+### Contrast of every pair in use
+
+Calculated with WCAG 2.x relative luminance (sRGB linearisation, `(L1 + 0.05) / (L2 + 0.05)`), not estimated. Luminances: background 0.0232, surface 0.0331, foreground 0.5271, muted 0.3515, border-strong 0.2542, accent 0.1614, accent-hover 0.1132, danger 0.4651, danger-surface 0.0298, success 0.4984, success-surface 0.0350.
+
+| Pair (fg on bg) | Where | Contrast | Minimum | |
 |---|---|---|---|---|
-| `--muted` | `#52525b` | `#a1a1aa` | secondary text (tagline, paragraphs, hints). Replaces the template's loose `zinc-*` | 7.7:1 on bg (light) · 7.8:1 (dark) |
-| `--surface` | `#fafafa` | `#171717` | project cards, secondary hover | muted on surface: 7.41:1 · 7.00:1 |
-| `--border` | `#e4e4e7` | `#27272a` | decorative separators and card borders | decorative, no minimum |
-| `--border-strong` | `#71717a` | `#71717a` | **input and secondary button borders** (WCAG 1.4.11 asks for ≥ 3:1 on control borders) | 4.8:1 · 4.10:1 on bg |
-| `--foreground-hover` | `#383838` | `#cccccc` | primary button hover (those were the template's hard-coded hexes) | background on hover: 11.73:1 · 12.33:1 |
-| `--ring` | `#2563eb` | `#60a5fa` | focus outline. The only "colour" that isn't monochrome, so focus always stands out | 5.2:1 · 7.79:1 on bg |
-| `--danger` | `#b91c1c` | `#f87171` | field error text and borders, error banner text | 6.5:1 · 7.16:1 on bg |
-| `--danger-surface` | `#fef2f2` | `#450a0a` | error banner background | danger on it: 5.91:1 · 5.84:1 |
-| `--success` | `#15803d` | `#4ade80` | success banner text | 5.0:1 · 10:1 on bg |
-| `--success-surface` | `#f0fdf4` | `#052e16` | success banner background | success on it: 4.8:1 · 8.55:1 |
+| foreground on background | body text, headings, inputs, secondary CTA, skip link | 7.89:1 | 4.5 | ✅ |
+| foreground on surface | card titles, tags, secondary CTA on hover | 6.94:1 | 4.5 | ✅ |
+| muted on background | tagline, paragraphs, nav, counter, footer, required note | 5.49:1 | 4.5 | ✅ |
+| muted on surface | card descriptions | **4.83:1** | 4.5 | ✅ lowest text margin |
+| border-strong on background | input borders, secondary CTA border | 4.16:1 | 3 | ✅ |
+| border-strong on surface | secondary CTA on hover, card hover border | **3.66:1** | 3 | ✅ lowest non-text margin |
+| ring on background | focus everywhere (offset 2 px, so it sits on the page) | 14.35:1 | 3 | ✅ |
+| ring on surface | focus on a project link inside a card | 12.63:1 | 3 | ✅ |
+| accent-foreground on accent | primary CTA and submit button at rest | **4.97:1** | 4.5 | ✅ |
+| accent-foreground on accent-hover | primary CTA and submit button on hover | 6.44:1 | 4.5 | ✅ |
+| danger on background | field error text, error border on inputs | 7.04:1 | 4.5 | ✅ |
+| danger on surface | (reference, if an error ever appears inside a card) | 6.20:1 | 4.5 | ✅ |
+| danger on danger-surface | error banner | 6.45:1 | 4.5 | ✅ |
+| success on success-surface | success banner | 6.45:1 | 4.5 | ✅ |
+| success on background | (reference, in case the banner surface is ever dropped) | 7.50:1 | 4.5 | ✅ |
+| danger vs accent | distinguishability, not a text pair | 2.44:1 | n/a | clearly different lightness |
 
-Combinations that aren't in the table but appear in the UI (light · dark):
+Pairs that are **invalid** and must not appear: accent on background as text, border or ring (2.89:1); accent on surface as text, border or ring, e.g. a red card border (2.54:1); accent on foreground (2.73:1); foreground on accent (2.73:1).
 
-| Pair | Where | Contrast | Minimum |
-|---|---|---|---|
-| `border-strong` on `surface` | secondary CTA on hover | 4.63:1 · **3.71:1** | 3:1 |
-| `ring` on `surface` | focus on a link inside a project card | 4.95:1 · 7.05:1 | 3:1 |
+Note on the red button's edge: accent vs background is 2.89:1. That's acceptable because the button is identified by its white label, not by its outline (WCAG 1.4.11 doesn't require the fill boundary when the text identifies the control). Don't make any control that depends only on its red shape.
 
-Values recalculated by `reviewer` with WCAG 2.x relative luminance. The lowest margin is `border-strong` on `surface` in dark (3.71:1): **if `--surface` or `--border-strong` change, recheck that pair first.**
+**If `--surface`, `--muted` or `--border-strong` change, recheck "muted on surface" and "border-strong on surface" first.** If `--accent` or `--accent-hover` change, white on them must stay ≥ 4.5:1 (red luminance ≤ 0.183).
 
-Front replaces every loose `zinc-*`, `black/[.08]` and `#383838` with these tokens.
+Front replaces every loose `zinc-*`, `black/[.08]` and hard-coded hex with these tokens.
+
+### Accent: where yes, where no
+
+Signal Red is a signal: if it's everywhere, it signals nothing. It appears **exactly twice** on the page, and both are "write to me" actions.
+
+| Uses the accent | Doesn't use the accent (and uses instead) |
+|---|---|
+| Hero primary CTA "Escríbeme" (`bg-accent`) | Secondary CTA "Ver proyectos" (`border-border-strong`, hover `bg-surface`) |
+| Contact submit "Enviar mensaje" (`bg-accent`) | Nav links, header name, footer links (`text-muted` → `text-foreground`) |
+| | Focus ring (`--ring`, white) |
+| | Input borders, card borders, tags (`--border-strong` / `--border`) |
+| | Headings, the h1, any text (`--foreground` / `--muted`) |
+| | Field errors and the error banner (`--danger`, coral, never the accent) |
+| | Project links and card hover (`border-border-strong`) |
+| | Spinner, icons, selection, scrollbar, dividers |
+
+No new accent usage without updating this table first.
 
 ### Focus (global)
-`focus-visible:outline-2 outline-offset-2 outline-ring` on every interactive element (links, CTAs, inputs, button, skip link). Inputs with an error keep the `ring` outline on focus; the red border stays underneath.
+`focus-visible:outline-2 outline-offset-2 outline-ring` on every interactive element (links, CTAs, inputs, button, skip link). Inputs with an error keep the `ring` outline on focus; the coral `danger` border stays underneath. On the red buttons the white ring is separated from the fill by the 2 px offset, so it's read against the background (14.35:1).
 
 ---
 
@@ -294,7 +333,9 @@ No 429 (there's no rate limiting) and no custom 500 body.
 - [ ] Button with `aria-disabled` while sending (not `disabled`).
 - [ ] Honeypot out of the tab order and out of the accessibility tree.
 - [ ] Visible focus with `--ring` on everything interactive. Logical tab order = DOM order (skip link → header → hero CTAs → project links → name → email → message → button → footer).
-- [ ] Contrast: every pair in §3 ≥ 4.5:1 for text and ≥ 3:1 for control borders.
+- [ ] Contrast: every pair in §3 ≥ 4.5:1 for text and ≥ 3:1 for control borders and focus. Red never used as text, border or ring.
+- [ ] `color-scheme: dark` declared (CSS + viewport meta); no `prefers-color-scheme` query left. Native controls and scrollbar render dark.
+- [ ] Accent only on the two elements listed in §3 "Accent: where yes, where no".
 - [ ] Targets ≥ 44 × 44 px.
 - [ ] `prefers-reduced-motion: reduce`: no smooth scroll, static spinner, colour transitions ≤ 150 ms allowed (they aren't displacement). No entrance or on-scroll animations.
 - [ ] `prefers-reduced-transparency`: no translucency or blur anywhere on the page, so there's nothing to adapt. If a sticky header with blur is ever added, it needs a solid background under this query.
