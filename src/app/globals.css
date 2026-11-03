@@ -12,6 +12,7 @@
   --accent: #e10600;
   --accent-foreground: #ffffff;
   --accent-hover: #c00500;
+  --scrim: #000000;
   --danger: #ff9a94;
   --danger-surface: #4a2626;
   --success: #6fcf8a;
@@ -29,6 +30,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-hover: var(--accent-hover);
+  --color-scrim: var(--scrim);
   --color-danger: var(--danger);
   --color-danger-surface: var(--danger-surface);
   --color-success: var(--success);
@@ -43,9 +45,104 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+html {
+  scrollbar-gutter: stable;
+  scroll-padding-top: 3.5rem;
+}
+
+@media (min-width: 64rem) {
+  html {
+    scroll-padding-top: 0;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
+  }
+}
+
+/* Mobile drawer: native <dialog>. Entry 220ms, exit 160ms (faster),
+   transform + opacity only. display/overlay are discrete so the exit plays. */
+.drawer {
+  transform: translateX(-100%);
+  transition:
+    transform 160ms ease-in,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
+}
+
+.drawer[open] {
+  transform: none;
+  transition:
+    transform 220ms cubic-bezier(0.32, 0.72, 0, 1),
+    display 220ms allow-discrete,
+    overlay 220ms allow-discrete;
+}
+
+@starting-style {
+  .drawer[open] {
+    transform: translateX(-100%);
+  }
+}
+
+.drawer::backdrop {
+  background: color-mix(in srgb, var(--scrim) 60%, transparent);
+  opacity: 0;
+  transition:
+    opacity 160ms ease-out,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
+}
+
+.drawer[open]::backdrop {
+  opacity: 1;
+  transition:
+    opacity 220ms ease-out,
+    display 220ms allow-discrete,
+    overlay 220ms allow-discrete;
+}
+
+@starting-style {
+  .drawer[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer,
+  .drawer[open] {
+    transform: none;
+    opacity: 0;
+    transition:
+      opacity 100ms linear,
+      display 100ms allow-discrete,
+      overlay 100ms allow-discrete;
+  }
+
+  .drawer[open] {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .drawer[open] {
+      transform: none;
+      opacity: 0;
+    }
+  }
+
+  .drawer::backdrop,
+  .drawer[open]::backdrop {
+    transition:
+      opacity 100ms linear,
+      display 100ms allow-discrete,
+      overlay 100ms allow-discrete;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .drawer::backdrop {
+    background: var(--scrim);
   }
 }
 

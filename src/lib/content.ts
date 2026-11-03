@@ -31,9 +31,11 @@ export const projects: Project[] = [
   },
 ];
 
+export type SkillLevel = "Básico" | "Intermedio" | "Avanzado";
+
 export type Skill = {
   name: string;
-  level: string; // short level label
+  level: SkillLevel;
 };
 
 export type SkillGroup = {
@@ -74,3 +76,18 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
 ];
+
+// Single source for the sidebar and the drawer (same order, same copy).
+// `id` is the section id; `headingId` is the h2 that receives focus when a
+// drawer link is used.
+export type NavItem = { id: string; headingId: string; label: string };
+
+export const navItems: NavItem[] = [
+  { id: "sobre-mi", headingId: "sobre-mi-title", label: "Sobre mí" },
+  { id: "conocimientos", headingId: "conocimientos-title", label: "Conocimientos" },
+  { id: "proyectos", headingId: "proyectos-title", label: "Proyectos" },
+  { id: "contacto", headingId: "contacto-title", label: "Contacto" },
+];
+
+// Sections watched for the current-section indicator ("inicio" = no link active).
+export const sectionIds = ["inicio", ...navItems.map((item) => item.id)];

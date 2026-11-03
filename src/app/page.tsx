@@ -1,4 +1,5 @@
 import { ContactForm } from "@/components/contact-form";
+import { SiteHeader } from "@/components/site-header";
 import { about, projects, skillGroups, skillsTitle, tagline } from "@/lib/content";
 
 const container = "mx-auto w-full max-w-3xl px-6 sm:px-8";
@@ -15,33 +16,14 @@ export default function Home() {
     <>
       <a
         href="#contenido"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:rounded-lg focus:bg-background focus:px-4 focus:py-3"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-background focus:px-4 focus:py-3"
       >
         Saltar al contenido
       </a>
 
-      <header className={`${container} flex flex-wrap items-center justify-between gap-x-4 py-4`}>
-        <a href="#inicio" className="inline-flex min-h-11 items-center text-sm font-semibold">
-          Marc Pérez
-        </a>
-        <nav aria-label="Principal">
-          <ul className="flex gap-4 text-sm text-muted sm:gap-6">
-            <li>
-              <a href="#sobre-mi" className={linkClass}>Sobre mí</a>
-            </li>
-            <li>
-              <a href="#conocimientos" className={linkClass}>Conocimientos</a>
-            </li>
-            <li>
-              <a href="#proyectos" className={linkClass}>Proyectos</a>
-            </li>
-            <li>
-              <a href="#contacto" className={linkClass}>Contacto</a>
-            </li>
-          </ul>
-        </nav>
-      </header>
+      <SiteHeader />
 
+      <div className="flex flex-1 flex-col lg:pl-64">
       <main id="contenido" className="flex-1">
         <section
           id="inicio"
@@ -50,6 +32,7 @@ export default function Home() {
         >
           <h1
             id="hero-title"
+            tabIndex={-1}
             className="text-4xl font-semibold tracking-tight sm:text-5xl"
           >
             Marc Pérez
@@ -70,6 +53,7 @@ export default function Home() {
         >
           <h2
             id="sobre-mi-title"
+            tabIndex={-1}
             className="text-2xl font-semibold tracking-tight"
           >
             Sobre mí
@@ -88,21 +72,23 @@ export default function Home() {
         >
           <h2
             id="conocimientos-title"
+            tabIndex={-1}
             className="text-2xl font-semibold tracking-tight"
           >
             {skillsTitle}
           </h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
             {skillGroups.map((group) => (
               <article
                 key={group.title}
                 className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-6"
               >
                 <h3 className="text-lg font-semibold">{group.title}</h3>
-                <ul aria-label={group.title} className="space-y-2 text-sm leading-6">
+                <ul aria-label={`Conocimientos de ${group.title}`} className="space-y-2 text-sm leading-6">
                   {group.skills.map((skill) => (
                     <li key={skill.name}>
                       <span>{skill.name}</span>
+                      <span className="sr-only">, nivel </span>
                       <span className="block text-muted">{skill.level}</span>
                     </li>
                   ))}
@@ -119,6 +105,7 @@ export default function Home() {
         >
           <h2
             id="proyectos-title"
+            tabIndex={-1}
             className="text-2xl font-semibold tracking-tight"
           >
             Proyectos
@@ -178,6 +165,7 @@ export default function Home() {
         >
           <h2
             id="contacto-title"
+            tabIndex={-1}
             className="text-2xl font-semibold tracking-tight"
           >
             Contacto
@@ -194,6 +182,7 @@ export default function Home() {
         <span>Marc Pérez</span>
         <a href="#inicio" className={linkClass}>Volver arriba</a>
       </footer>
+      </div>
     </>
   );
 }

@@ -24,12 +24,13 @@ Visual direction: **dark only**. Charcoal background (`#2A2A2A`), silver text (`
 ### Order
 
 1. **Skip link** "Saltar al contenido" → `#contenido` (`<main id="contenido">`). Visually hidden until it gets focus.
-2. **Header** (`<header>`): name as a text link to `#inicio` + `<nav aria-label="Principal">` with three anchors: Sobre mí, Proyectos, Contacto.
+2. **Shell** (`<header>`): name as a text link to `#inicio` + navigation with **four** anchors: Sobre mí, Conocimientos, Proyectos, Contacto. Below `lg` (1024px) it is a sticky top bar (name + "Menú" button that opens an off-canvas drawer). From `lg` up the same `<header>` is a fixed left sidebar with the `<nav aria-label="Principal">` always visible. Full spec in §2.1.
 3. **Hero** (`<section id="inicio" aria-labelledby="hero-title">`): the h1, tagline, two CTAs.
 4. **Sobre mí** (`<section id="sobre-mi" aria-labelledby="sobre-mi-title">`).
-5. **Proyectos** (`<section id="proyectos" aria-labelledby="proyectos-title">`).
-6. **Contacto** (`<section id="contacto" aria-labelledby="contacto-title">`): intro + form.
-7. **Footer** (`<footer>`): "Marc Pérez" + "Volver arriba" link → `#inicio`.
+5. **Mis conocimientos** (`<section id="conocimientos" aria-labelledby="conocimientos-title">`): h2 + three non-interactive group cards (Front, Back, Database). Spec in §2.
+6. **Proyectos** (`<section id="proyectos" aria-labelledby="proyectos-title">`).
+7. **Contacto** (`<section id="contacto" aria-labelledby="contacto-title">`): intro + form.
+8. **Footer** (`<footer>`): "Marc Pérez" + "Volver arriba" link → `#inicio`.
 
 ### Single h1: the name
 
@@ -40,13 +41,17 @@ Why the name and not the tagline:
 - The tagline is placeholder and will change. The h1 shouldn't depend on copy that isn't written yet.
 - This removes the current template's duplication (a small "Marc Pérez" `<p>` above an unrelated h1).
 
-Heading tree: `h1` name → `h2` Sobre mí / Proyectos / Contacto → `h3` title of each project. Don't skip levels.
+Heading tree: `h1` name → `h2` Sobre mí / Mis conocimientos / Proyectos / Contacto → `h3` Front / Back / Database (one per skill group) under Mis conocimientos, and `h3` title of each project under Proyectos. Don't skip levels. The drawer and sidebar contain no headings (the nav is labelled by `aria-label`, not by an `h*`).
 
-### Navigation: yes, simple and not sticky
+### Navigation: sidebar on desktop, drawer on mobile (supersedes the old "three anchors, one row, not sticky" rule)
 
-The page has four blocks and the form is at the end. On mobile that's a lot of scroll, so the anchors help. It's **not sticky**: with three links it doesn't pay for the space it would take up on mobile, and it avoids translucency and blur (see `prefers-reduced-transparency`). Every section gets `scroll-margin-top: 1.5rem` so the h2 isn't stuck to the edge when you jump.
+The page now has five sections and four anchors. Four links no longer fit in one row on a 320px phone next to the name at 44px targets, so the inline row is dropped.
+- `lg+` (>= 1024px): fixed left sidebar, always visible, current-section indicator.
+- `< lg`: compact sticky top bar with the name and a "Menú" button; the links live in an off-canvas drawer.
+- The bar is sticky (reversal of the previous "not sticky" decision) because a menu button that scrolls away is unreachable from the middle of a long page. It is **solid** (`bg-background`, 1px `border-border` underneath): no blur and no translucency, so `prefers-reduced-transparency` needs nothing there.
+- Because the bar is sticky, jumps must not hide the h2 under it: `html { scroll-padding-top: 3.5rem }` below `lg` (the bar height) and `0` from `lg`; keep `section[id] { scroll-margin-top: 1.5rem }`. Total offset on mobile: 5rem.
 
-On mobile (< 640px) the three links fit in one row next to the name at `text-sm`. No hamburger menu.
+The link list is one array shared by sidebar and drawer (single source, same order, same copy).
 
 ---
 
@@ -56,9 +61,87 @@ Common container: `mx-auto w-full max-w-3xl px-6` (`sm:px-8`). One column to rea
 Vertical spacing between sections: `py-16` → `sm:py-24`. Separator between sections: `border-t border-border`.
 Minimum touch target: **44 × 44 px** (`min-h-11`) for nav links, CTAs, the button and inputs.
 
-### Header
-- Mobile: `flex justify-between items-center py-4`. Name `text-sm font-semibold`, nav `flex gap-4 text-sm text-muted`, hover and current page → `text-foreground`.
-- `sm+`: same, `gap-6`.
+### 2.1 Shell: sidebar (`lg+`) and drawer (`< lg`)
+
+Breakpoint: **`lg` = 64rem (1024px)**. Why: sidebar 16rem + content column 48rem (= `max-w-3xl`) fits exactly at 1024, so the content never gets narrower than today. Tablets in portrait (768 to 1023) get the drawer.
+
+#### Desktop sidebar (`lg+`)
+
+| Property | Value |
+|---|---|
+| Position | fixed (or sticky) to the left, full viewport height (`h-dvh`), does not scroll with the page. `overflow-y-auto` for very short viewports |
+| Width | `w-64` (16rem). Page content gets `lg:pl-64` (or a `16rem 1fr` grid); containers inside stay `mx-auto max-w-3xl px-8`, centred in the remaining column |
+| Surface | `bg-background`, `border-r border-border`. Solid. No shadow, blur or translucency |
+| Padding / layout | `px-4 py-6`, `flex flex-col gap-8` |
+| Name link (→ `#inicio`) | `min-h-11 px-3 inline-flex items-center text-base font-semibold`. Never has `aria-current` |
+| Nav | `<nav aria-label="Principal">` > `<ul class="flex flex-col gap-1">`. Items: Sobre mí, Conocimientos, Proyectos, Contacto |
+| The old inline header nav | removed from `lg+`: `<header>` has no horizontal row of links at any width |
+
+Link states (same classes in the drawer):
+
+| State | Style |
+|---|---|
+| Rest | `relative flex min-h-11 items-center rounded-lg px-3 text-sm text-muted` (5.49:1 on background) |
+| Hover | `text-foreground bg-surface` (6.94:1), transition `colors` <= 150 ms |
+| `:focus-visible` | global white `--ring` outline, 2px, offset 2px (14.35:1). Not red |
+| Current (`aria-current="location"`) | `text-foreground bg-surface` **plus** a 2px x 20px vertical bar at the left edge (`before:` pseudo, `left-0`, vertically centred, `rounded-full`, `bg-foreground`). Bar on background 7.89:1, on surface 6.94:1 (>= 3:1). No font-weight change (avoids text reflow). The state never relies on colour alone: bar + fill + `aria-current` |
+| Current + hover / focus | same as current; focus ring still shows |
+
+The accent is **not** used for the current indicator (§3 "Accent: where yes, where no").
+
+Current-section logic (client leaf, `IntersectionObserver`):
+- Observe the five `section[id]` (`inicio`, `sobre-mi`, `conocimientos`, `proyectos`, `contacto`).
+- `rootMargin: "-30% 0px -69% 0px"`: the active section is the one crossing the horizontal line at 30% of the viewport height. Set `aria-current="location"` on exactly one link.
+- `inicio` (hero) is active when the line is in the hero: **no link has `aria-current`** (the name link is not an item).
+- At the bottom of the page (`scrollY + innerHeight >= scrollHeight - 2`) force `contacto` active, so a short last section is still reachable.
+- Without JS (before hydration) no link has `aria-current`; the links still work.
+- Same logic updates the drawer links if they share the component.
+- `aria-current` only. Do not move focus and do not change the URL hash on scroll.
+
+#### Mobile top bar (`< lg`)
+
+- One `<header>` serves both layouts: below `lg` it is `sticky top-0 z-30 border-b border-border bg-background`; at `lg+` it switches to the fixed sidebar (`lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:border-b-0 lg:border-r`). The menu button is `lg:hidden`; the sidebar `<nav>` is `hidden lg:block`. Below `lg` the contents sit in a normal container (`mx-auto max-w-3xl px-6 sm:px-8`) with `flex h-14 items-center justify-between`, so the name aligns with the page content at 768 to 1023.
+- Left: name link → `#inicio`, `min-h-11 inline-flex items-center text-sm font-semibold`.
+- Right: **menu button**, visible text "Menú" + 20px three-line icon (`aria-hidden`): `<button type="button" aria-expanded="false|true" aria-controls="menu-movil">`, `min-h-11 min-w-11 gap-2 rounded-lg border border-border-strong px-3 text-sm`, hover `bg-surface`. Border-strong on background 4.16:1 (>= 3:1). The accessible name is always "Menú" (state is conveyed by `aria-expanded`, do not swap the label).
+- Skip link: raise to `focus:z-50` (it is currently `z-10`, which would sit **under** the sticky bar at `z-30`).
+
+#### Drawer (`< lg`)
+
+Structure: a modal dialog `id="menu-movil"` with `aria-label="Menú de navegación"`, containing the panel and the scrim.
+- **Recommended implementation: native `<dialog>` + `showModal()`.** It gives inert background, Esc, focus containment and focus restoration for free, and keeps `aria-controls` valid because the element is always in the DOM. A custom implementation is fine if it meets the criteria below. Either way: when closed, nothing inside the drawer is focusable or exposed to assistive tech (`display:none`, `inert` or `visibility:hidden`), and **at most one** `nav[aria-label="Principal"]` is exposed at any viewport (the sidebar nav is `display:none` below `lg`).
+- Panel: left edge, `w-80 max-w-[85vw]` (320px, never more than 85% of the viewport so the scrim stays visible on a 320px phone), `h-dvh`, `bg-background`, `border-r border-border`, `overflow-y-auto overscroll-contain`, `z-50`.
+- Panel top row: `flex h-14 items-center justify-between border-b border-border px-4`: name link (same style as the bar) on the left, **close button** on the right ("Cerrar" + X icon `aria-hidden`, same size and style as the menu button, `min-h-11 min-w-11`).
+- Below: `<nav aria-label="Principal">` with `p-4`, the same `<ul>` and link styles as the sidebar (min-h-11, gap-1).
+- Scrim: `--scrim` token (§3) at 60% (`bg-scrim/60`), covers the viewport, `aria-hidden`, not focusable. It is a pointer affordance only; the keyboard equivalents are Esc and the close button.
+- Nothing in the drawer uses the accent.
+
+Behaviour (acceptance criteria, all verifiable):
+
+| # | Criterion |
+|---|---|
+| 1 | Click/Enter/Space on "Menú" opens the drawer and sets `aria-expanded="true"` on the button. Closing sets it back to `false` |
+| 2 | On open, focus moves to the close button (first focusable). Screen reader announces the dialog name "Menú de navegación" |
+| 3 | Focus is trapped: Tab on the last link goes to the first focusable in the drawer, Shift+Tab on the first goes to the last; focus never lands on the page behind (with native `<dialog>` the browser UI may take a turn, which is acceptable). The page behind is `inert` / `aria-hidden` |
+| 4 | **Esc** closes the drawer |
+| 5 | Click on the scrim closes the drawer |
+| 6 | Close button closes the drawer |
+| 7 | On close via Esc, scrim or close button, focus returns to the "Menú" button (`focus({ preventScroll: true })`) |
+| 8 | **Click on a link** closes the drawer and navigates to the section. The scroll lock is released **synchronously in the click handler** (before the default anchor jump runs), otherwise the jump is swallowed. Focus does not return to the button: it moves to the target section's heading (`#hero-title`, `#sobre-mi-title`, `#conocimientos-title`, `#proyectos-title`, `#contacto-title`), which gets `tabIndex={-1}`, so keyboard and screen reader users continue from the section they chose |
+| 9 | Body scroll lock while open: `overflow: hidden` on `html`, with `html { scrollbar-gutter: stable }` always set so there is no layout shift when the scrollbar disappears. The panel has `overscroll-behavior: contain`. The lock is always released on close, on route change/unmount and on criterion 10 |
+| 10 | If the viewport grows to `>= lg` while the drawer is open (`matchMedia("(min-width: 64rem)")`), the drawer closes, the lock is released and the sidebar shows. Do not leave a dialog open on desktop |
+| 11 | The drawer reopens with the same state each time (no remembered scroll position inside it) |
+
+Motion:
+
+| Context | Spec |
+|---|---|
+| Open | panel `translateX(-100%) → 0`, **220 ms**, `cubic-bezier(0.32, 0.72, 0, 1)`; scrim `opacity 0 → 1`, 220 ms, `ease-out` |
+| Close | panel `0 → translateX(-100%)`, **160 ms**, `ease-in`; scrim `1 → 0`, 160 ms. Exit is faster than entry |
+| Properties | `transform` and `opacity` only |
+| `prefers-reduced-motion: reduce` | no translation. Panel and scrim cross-fade with `opacity`, **100 ms**, `linear`. State changes remain instant and complete (aria, focus, lock don't wait for the animation) |
+| `prefers-reduced-transparency: reduce` | scrim becomes fully opaque (`opacity: 1`, solid `--scrim`). The panel (`#2A2A2A`) then reads against black at 1.46:1 and the `border-r` marks its edge. No blur anywhere |
+
+Touch targets: every interactive element in the bar, drawer and sidebar is >= 44 x 44px (`min-h-11`, `min-w-11` for the buttons). Gap between links is 4px but the targets are 44px tall, so they don't overlap.
 
 ### Hero
 - Mobile: `pt-16 pb-16`, left-aligned (no centring, so it lines up with the sections below).
@@ -71,6 +154,22 @@ Minimum touch target: **44 × 44 px** (`min-h-11`) for nav links, CTAs, the butt
 ### Sobre mí
 - h2 `text-2xl font-semibold tracking-tight`.
 - 2 to 3 paragraphs `mt-4 space-y-4 text-base leading-7 text-muted max-w-prose`.
+
+### Mis conocimientos
+Already built in `src/app/page.tsx`; this section documents it and lists the corrections.
+- Section: same `section` wrapper as the others (`border-t border-border py-16 sm:py-24`), `id="conocimientos"`, `aria-labelledby="conocimientos-title"`.
+- `h2` "Mis conocimientos" (`text-2xl font-semibold tracking-tight`). No intro paragraph.
+- Grid: `mt-8 grid gap-4` → **`md:grid-cols-3`** (change from the current `sm:grid-cols-3`). Why: at `sm` (640 to 767) a card text column is only ~133px, which wraps every skill name; from `md` (768) the container is 704px of content and each card is 224px wide (176px of text). One column below `md`. At `lg+` the content column is `100vw - 16rem`, which is >= 768 so the same maths holds.
+- Card: `<article>` with `flex flex-col gap-3 rounded-xl border border-border bg-surface p-6`. **Not interactive**: no link, no hover change, no `border-border-strong`, no pointer cursor.
+  - `h3` group title `text-lg font-semibold` (Front, Back, Database).
+  - `<ul class="space-y-2 text-sm leading-6">`. Each `<li>`: skill name (`text-foreground`, 6.94:1 on surface) and, in a `block` span below it, the level (`text-muted`, 4.83:1 on surface).
+  - Level is a text label from a closed vocabulary: **Básico · Intermedio · Avanzado**. No bars, dots, stars or colour coding (level must not depend on colour or on a graphic).
+- Fixes for `front` (small):
+  1. List label: replace `aria-label={group.title}` (repeats the h3) with `aria-label="Conocimientos de {title}"`, e.g. "Conocimientos de Front".
+  2. Name and level are two spans with no separator, so a screen reader reads "Tecnología de ejemplo A Avanzado". Put `<span class="sr-only">, nivel </span>` between them (reads "…A, nivel Avanzado").
+  3. Type `level` as `"Básico" | "Intermedio" | "Avanzado"` in `src/lib/content.ts`.
+- Data (`skillsTitle`, `skillGroups`): 3 groups, 4 to 6 skills each. A group with 0 skills is not rendered. There is no loading, error or empty state (static content). Placeholder skill names stay self-describing ("Tecnología de ejemplo A"); don't invent real proficiency.
+- Navigation label is **"Conocimientos"** (short, fits the sidebar) while the h2 is "Mis conocimientos"; the nav name is contained in the heading text, so there is no mismatch for voice control.
 
 ### Proyectos
 - Grid: `grid gap-4 mt-8` → `sm:grid-cols-2`. With a 3xl container, two columns is the maximum before cards get too narrow.
@@ -127,6 +226,7 @@ Placeholder content: **don't invent biographical data or real projects**. Use se
 | `--accent` | `#E10600` | **new.** Signal Red. Fill of the two primary actions only |
 | `--accent-foreground` | `#FFFFFF` | **new.** Text and icon on `--accent` / `--accent-hover`. Silver on red is 2.73:1, so it can't be silver |
 | `--accent-hover` | `#C00500` | **new.** Primary action hover. Darker, not lighter: white text stays ≥ 4.5:1 only while the red's luminance is ≤ 0.183, and the base red is already at 0.161 |
+| `--scrim` | `#000000` | **new.** Drawer backdrop. Always used with alpha: `bg-scrim/60` normally, `bg-scrim` (opaque) under `prefers-reduced-transparency: reduce`. Expose as `--color-scrim` in `@theme inline`. Never carries text, so no text contrast applies; 60% black over the background gives ~#111111, the panel (`--background`) vs the dimmed page is 1.32:1, which is fine because the panel edge is a region boundary marked by `border-r`, not a control boundary (WCAG 1.4.11 does not apply). Opaque, panel vs scrim is 1.46:1 |
 | `--danger` | `#FF9A94` | field error text and borders, error banner text. Light coral: much lighter than the accent (2.44:1 between them) so an error never reads as "the brand red", and it's always paired with an icon |
 | `--danger-surface` | `#4A2626` | error banner background |
 | `--success` | `#6FCF8A` | success banner text |
@@ -148,6 +248,9 @@ Calculated with WCAG 2.x relative luminance (sRGB linearisation, `(L1 + 0.05) / 
 | border-strong on surface | secondary CTA on hover, card hover border | **3.66:1** | 3 | ✅ lowest non-text margin |
 | ring on background | focus everywhere (offset 2 px, so it sits on the page) | 14.35:1 | 3 | ✅ |
 | ring on surface | focus on a project link inside a card | 12.63:1 | 3 | ✅ |
+| foreground on surface (current nav link) | sidebar/drawer link with `aria-current` or hover | 6.94:1 | 4.5 | ✅ |
+| foreground (indicator bar) on background / surface | 2px bar of the current link | 7.89:1 / 6.94:1 | 3 | ✅ |
+| border-strong on background | menu and close button borders | 4.16:1 | 3 | ✅ |
 | accent-foreground on accent | primary CTA and submit button at rest | **4.97:1** | 4.5 | ✅ |
 | accent-foreground on accent-hover | primary CTA and submit button on hover | 6.44:1 | 4.5 | ✅ |
 | danger on background | field error text, error border on inputs | 7.04:1 | 4.5 | ✅ |
@@ -172,7 +275,8 @@ Signal Red is a signal: if it's everywhere, it signals nothing. It appears **exa
 | Uses the accent | Doesn't use the accent (and uses instead) |
 |---|---|
 | Hero primary CTA "Escríbeme" (`bg-accent`) | Secondary CTA "Ver proyectos" (`border-border-strong`, hover `bg-surface`) |
-| Contact submit "Enviar mensaje" (`bg-accent`) | Nav links, header name, footer links (`text-muted` → `text-foreground`) |
+| Contact submit "Enviar mensaje" (`bg-accent`) | Sidebar and drawer links, current-section indicator (`text-muted` → `text-foreground`, bar `bg-foreground`), menu and close buttons (`border-border-strong`), header name, footer links |
+| | Drawer scrim (`--scrim`) and skill group cards (`border-border`, `bg-surface`) |
 | | Focus ring (`--ring`, white) |
 | | Input borders, card borders, tags (`--border-strong` / `--border`) |
 | | Headings, the h1, any text (`--foreground` / `--muted`) |
@@ -275,9 +379,15 @@ Note on 413: with the real form it doesn't happen (each field is limited with `m
 | Element | Text |
 |---|---|
 | Skip link | Saltar al contenido |
-| Nav | Sobre mí · Proyectos · Contacto |
+| Nav links (sidebar and drawer, in this order) | Sobre mí · Conocimientos · Proyectos · Contacto |
+| Nav landmark `aria-label` | Principal |
+| Menu button / close button | Menú · Cerrar |
+| Drawer dialog `aria-label` | Menú de navegación |
 | Hero CTA primary / secondary | Escríbeme · Ver proyectos |
-| Section h2s | Sobre mí · Proyectos · Contacto |
+| Section h2s | Sobre mí · Mis conocimientos · Proyectos · Contacto |
+| Skill group h3s | Front · Back · Database |
+| Skill level labels | Básico · Intermedio · Avanzado |
+| Skill list `aria-label` / level separator (sr-only) | Conocimientos de {grupo} · ", nivel " |
 | Contact intro | ¿Tienes una propuesta o una pregunta? Escríbeme y te responderé por correo. |
 | Required note | Todos los campos son obligatorios. |
 | Button idle / submitting | Enviar mensaje · Enviando… |
@@ -320,7 +430,10 @@ No 429 (there's no rate limiting) and no custom 500 body.
 
 ## 7. Accessibility (checklist for front and the reviewer)
 
-- [ ] `lang="es"`, single h1, heading levels without gaps, landmarks `header` / `nav` / `main` / `footer`.
+- [ ] `lang="es"`, single h1, heading levels without gaps, landmarks `header` / `nav` / `main` / `footer`. Only one `nav[aria-label="Principal"]` exposed to assistive tech at any width.
+- [ ] Side menu: the 11 drawer criteria in §2.1 pass (aria-expanded/aria-controls, focus in, trap, Esc, scrim, focus return, link click, scroll lock, resize to `lg`). Closed drawer is not focusable.
+- [ ] Current section: exactly one link with `aria-current="location"` (none in the hero); indicator is bar + fill, not colour alone, and not red.
+- [ ] Sticky bar does not hide focused elements or anchor targets (`scroll-padding-top: 3.5rem` below `lg`); skip link is above it (`z-50`).
 - [ ] Working skip link, visible on focus.
 - [ ] Visible `<label for>` on every field (no placeholders acting as labels; the form doesn't use placeholders).
 - [ ] Errors linked with `aria-describedby` + `aria-invalid`, icon + text (not colour alone).
@@ -332,11 +445,11 @@ No 429 (there's no rate limiting) and no custom 500 body.
 - [ ] Focus on the first field with an error after a failed submit (client or server), **with `aria-invalid` and `aria-describedby` already applied when focus arrives** (criterion in §4.2).
 - [ ] Button with `aria-disabled` while sending (not `disabled`).
 - [ ] Honeypot out of the tab order and out of the accessibility tree.
-- [ ] Visible focus with `--ring` on everything interactive. Logical tab order = DOM order (skip link → header → hero CTAs → project links → name → email → message → button → footer).
+- [ ] Visible focus with `--ring` on everything interactive. Logical tab order = DOM order (skip link → sidebar name + links on `lg+`, or bar name + "Menú" button below `lg` → hero CTAs → project links → name → email → message → button → footer).
 - [ ] Contrast: every pair in §3 ≥ 4.5:1 for text and ≥ 3:1 for control borders and focus. Red never used as text, border or ring.
 - [ ] `color-scheme: dark` declared (CSS + viewport meta); no `prefers-color-scheme` query left. Native controls and scrollbar render dark.
 - [ ] Accent only on the two elements listed in §3 "Accent: where yes, where no".
 - [ ] Targets ≥ 44 × 44 px.
-- [ ] `prefers-reduced-motion: reduce`: no smooth scroll, static spinner, colour transitions ≤ 150 ms allowed (they aren't displacement). No entrance or on-scroll animations.
-- [ ] `prefers-reduced-transparency`: no translucency or blur anywhere on the page, so there's nothing to adapt. If a sticky header with blur is ever added, it needs a solid background under this query.
+- [ ] `prefers-reduced-motion: reduce`: no smooth scroll, static spinner, colour transitions ≤ 150 ms allowed (they aren't displacement). No entrance or on-scroll animations. Only exception: the drawer (§2.1), which under `reduce` is a 100 ms opacity cross-fade with no translation.
+- [ ] `prefers-reduced-transparency`: no blur anywhere, and the sticky bar is solid. The only translucent element is the drawer scrim (60%); under `reduce` it is opaque.
 - [ ] Project link that opens a new tab → announced (sr-only text).
